@@ -439,14 +439,13 @@
 
         <!-- Upload Tab -->
         <div class="tab-content active" id="upload">
-            <form id="checkForm" enctype="multipart/form-data">
-                <select name="lot_name" id="lotSelect" required>
-                    <option value="" disabled selected>Select Parking Lot</option>
-                </select>
-                <input type="file" name="file" id="file" accept="image/*" required>
-                <button type="submit">Check Lot</button>
-            </form>
-        </div>
+    <form id="checkForm">
+        <select name="lot_name" id="lotSelect" required>
+            <option value="" disabled selected>Select Parking Lot</option>
+        </select>
+        <button type="submit">Check Lot</button>
+    </form>
+</div>
 
         <!-- Counters Tab -->
         <div class="tab-content" id="counters">
@@ -595,49 +594,46 @@
 
         loadLots();
 
-        // Submit form
-        const form = document.getElementById('checkForm');
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const lotName = document.getElementById('lotSelect').value;
-            currentLot = lotName;
-            const fileInput = document.getElementById('file');
-            const file = fileInput.files[0];
-            const formData = new FormData();
-            formData.append('lot_name', lotName);
-            formData.append('file', file);
+     const form = document.getElementById('checkForm');
+form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const lotName = document.getElementById('lotSelect').value;
+    currentLot = lotName;
+    const formData = new FormData();
+    formData.append('lot_name', lotName);
 
-            const response = await fetch('/student/check', {
-                method: 'POST',
-                body: formData
-            });
+    const response = await fetch('/student/check', {
+        method: 'POST',
+        body: formData
+    });
 
-            const data = await response.json();
+    const data = await response.json();
 
-            // Cache spot images
-            spotImagesCache = data.spot_images || [];
+    // Cache spot images
+    spotImagesCache = data.spot_images || [];
 
-            // Update counters
-            document.getElementById('free_count').textContent = data.free_count;
-            document.getElementById('occupied_count').textContent = data.occupied_count;
-            document.getElementById('total_count').textContent = data.total;
-            document.getElementById('occupancy_percent').textContent = data.taken_spots + '%';
+    // Update counters
+    document.getElementById('free_count').textContent = data.free_count;
+    document.getElementById('occupied_count').textContent = data.occupied_count;
+    document.getElementById('total_count').textContent = data.total;
+    document.getElementById('occupancy_percent').textContent = data.taken_spots + '%';
 
-            // Update images
-            const annotated = document.getElementById('annotated_image');
-            annotated.src = data.annotated_image + '?t=' + new Date().getTime();
+    // Update images
+    const annotated = document.getElementById('annotated_image');
+    annotated.src = data.annotated_image + '?t=' + new Date().getTime();
 
-            if (data.grid_map) {
-                const grid = document.getElementById('grid_map');
-                grid.src = data.grid_map + '?t=' + new Date().getTime();
-            }
+    if (data.grid_map) {
+        const grid = document.getElementById('grid_map');
+        grid.src = data.grid_map + '?t=' + new Date().getTime();
+    }
 
-            // Load analytics data immediately after check
-            await loadAnalytics(lotName);
+    // Load analytics data immediately after check
+    await loadAnalytics(lotName);
 
-            showTabs();
-            document.querySelector('.tab[data-tab="counters"]').click();
-        });
+    showTabs();
+    document.querySelector('.tab[data-tab="counters"]').click();
+});
+
 
         // Load Analytics
         async function loadAnalytics(lotName) {
